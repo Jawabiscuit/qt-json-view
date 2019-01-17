@@ -1,0 +1,3 @@
+[submodule "vendor/Qt.py"]
+	path = vendor/Qt.py
+	url = https://github.com/MayaPythonTools/Qt.py.git
