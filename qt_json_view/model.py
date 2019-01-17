@@ -16,11 +16,21 @@ class JsonModel(QtGui.QStandardItemModel):
             key_item = self._create_key_item(key, data_type=type(value))
             empty_item = self._create_empty_item()
             if isinstance(value, dict):
-                parent.appendRow([key_item, empty_item])
-                self.items_from_dict(value, key_item)
+                # insert {} display values for empty dicts
+                if value == {}:
+                    value_item = self._create_value_item(value)
+                    parent.appendRow([key_item, value_item])
+                else:
+                    parent.appendRow([key_item, empty_item])
+                    self.items_from_dict(value, key_item)
             elif isinstance(value, list):
-                parent.appendRow([key_item, empty_item])
-                self.items_from_list(value, key_item)
+                # insert [] display values for empty lists
+                if value == []:
+                    value_item = self._create_value_item(value)
+                    parent.appendRow([key_item, value_item])
+                else:
+                    parent.appendRow([key_item, empty_item])
+                    self.items_from_list(value, key_item)
             else:
                 value_item = self._create_value_item(value)
                 parent.appendRow([key_item, value_item])
@@ -28,14 +38,24 @@ class JsonModel(QtGui.QStandardItemModel):
     def items_from_list(self, data, parent):
         """Represent the list by items."""
         for i, value in enumerate(data):
-            key_item = self._create_key_item("-", data_type=type(value))
+            key_item = self._create_key_item(str(i), data_type=type(value))
             empty_item = self._create_empty_item()
             if isinstance(value, dict):
-                parent.appendRow([key_item, empty_item])
-                self.items_from_dict(value, key_item)
+                # insert {} display values for empty dicts
+                if value == {}:
+                    value_item = self._create_value_item(value)
+                    parent.appendRow([key_item, value_item])
+                else:
+                    parent.appendRow([key_item, empty_item])
+                    self.items_from_dict(value, key_item)
             elif isinstance(value, list):
-                parent.appendRow([key_item, empty_item])
-                self.items_from_list(value, key_item)
+                # insert [] display values for empty lists
+                if value == []:
+                    value_item = self._create_value_item(value)
+                    parent.appendRow([key_item, value_item])
+                else:
+                    parent.appendRow([key_item, empty_item])
+                    self.items_from_list(value, key_item)
             else:
                 value_item = self._create_value_item(value)
                 parent.appendRow([key_item, value_item])
@@ -49,9 +69,16 @@ class JsonModel(QtGui.QStandardItemModel):
             QtCore.Qt.ItemIsEditable)
         return key_item
 
+    def _get_display_value(self, value):
+        """Get an items representation"""
+        return ("null" if value is None
+                else "[ ]" if value == []
+                else "{ }" if value == {}
+                else value)
+
     def _create_value_item(self, value):
         """Item representing a value."""
-        display_value = value
+        display_value = self._get_display_value(value)
         value_item = QtGui.QStandardItem(display_value)
         value_item.setData(display_value, QtCore.Qt.DisplayRole)
         value_item.setData(value, QtCore.Qt.UserRole)
