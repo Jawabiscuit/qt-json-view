@@ -1,55 +1,47 @@
 #! /bin/env python
+import json
+
+from Qt import QtWidgets
+from qt_json_view.view import JsonView
+from qt_json_view.model import JsonModel
 
 
-if __name__ == '__main__':
-    import sys    
-    import json
+class App(QtWidgets.QApplication):
+    data = {
+        "none": None,
+        "bool": True,
+        "int": 666,
+        "float": 1.23,
+        "list": [1, 2, 3],
+        "empty_list": [],
+        "dict": {"key": "value"},
+        "empty_dict": {},
+        "nested_dict": {
+            "dict": {
+                "key": "value",
+                "empty_list": []},
+            "empty_dict": {},}}
 
-    from Qt import QtWidgets
-    from qt_json_view.view import JsonView
-    from qt_json_view.model import JsonModel
+    def __init__(self, sys_argv):
+        super(App, self).__init__(sys_argv)
 
-    class App(QtWidgets.QApplication):
-        data = {
-            "none": None,
-            "bool": True,
-            "int": 666,
-            "float": 1.23,
-            "list": [1, 2, 3],
-            "empty_list": [],
-            "dict": {"key": "value"},
-            "empty_dict": {},
-            "nested_dict": {
-                "dict": {
-                    "key": "value",
-                    "empty_list": []},
-                "empty_dict": {},}}
+        self.widget = widget = QtWidgets.QWidget()
+        widget.setLayout(QtWidgets.QVBoxLayout())
+        widget.setGeometry(100, 100, 400, 400)
 
-        def __init__(self, sys_argv):
-            super(App, self).__init__(sys_argv)
+        button = QtWidgets.QPushButton("Serialize")
 
-            self.widget = widget = QtWidgets.QWidget()
-            widget.setLayout(QtWidgets.QVBoxLayout())
-            widget.setGeometry(100, 100, 400, 400)
+        self.view = view = JsonView()
+        self.model = model = JsonModel()
 
-            button = QtWidgets.QPushButton("Serialize")
+        widget.layout().addWidget(view)
+        widget.layout().addWidget(button)
 
-            self.view = view = JsonView()
-            self.model = model = JsonModel()
+        model.items_from_dict(data=self.data)
+        view.setModel(model)
 
-            widget.layout().addWidget(view)
-            widget.layout().addWidget(button)
+        button.clicked.connect(self.serialize)
 
-            model.items_from_dict(data=self.data)
-            view.setModel(model)
+    def serialize(self):
+        print(json.dumps(self.model.serialize(), indent=2))
 
-            button.clicked.connect(self.serialize)
-
-        def serialize(self):
-            print(json.dumps(self.model.serialize(), indent=2))
-
-
-    app = App(sys.argv)
-    app.widget.show()
-    app.view.expandAll()
-    sys.exit(app.exec_())

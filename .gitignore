@@ -104,3 +104,4 @@ venv.bak/
 .mypy_cache/
 /.emacs
 /packFile.py
+.emacs.desktop
