@@ -44,11 +44,10 @@ class JsonView(QtWidgets.QTreeView):
             return
 
         key_label = {
-            bool: "Bool", int: "Integer", float: "Float", basestring: "String",
-            list: "List", dict: "Dict"
+            bool: "bool", int: "int", float: "float", basestring: "str",
+            list: "list", dict: "dict"
         }[data_type]
-        if parent.data(QtCore.Qt.UserRole) == list:
-            key_label = "-"
+
         key_item = self.model()._create_key_item(key_label, data_type)
 
         if data_type is list:
