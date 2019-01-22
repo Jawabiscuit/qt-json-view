@@ -1,10 +1,17 @@
 #! /usr/bin/env python
-from qt_json_view.app import App
+from qt_json_view.app import MainWindow, dumpTestData, loadTestData
 
 
 if __name__ == "__main__":
     import sys
-    app = App(sys.argv)
-    app.widget.show()
-    app.view.expandAll()
+    from Qt.QtWidgets import QApplication
+    
+    app = QApplication(sys.argv)
+
+    fp = dumpTestData()
+    data = loadTestData(fp)
+
+    ui = MainWindow(data)
+    ui.show()
+
     sys.exit(app.exec_())
