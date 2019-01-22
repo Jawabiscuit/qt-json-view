@@ -72,9 +72,9 @@ class JsonModel(QtGui.QStandardItemModel):
     def _get_display_value(self, value):
         """Get an items representation"""
         return ("null" if value is None
-                else "[ ]" if value == []
-                else "{ }" if value == {}
-                else value)
+                else "[]" if value == []
+                else "{}" if value == {}
+                else str(value))
 
     def _create_value_item(self, value):
         """Item representing a value."""
