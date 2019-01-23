@@ -1,3 +1,6 @@
+"""
+TODO _item_changed()
+"""
 from Qt import QtCore, QtGui, QtWidgets
 
 
@@ -7,6 +10,12 @@ class JsonModel(QtGui.QStandardItemModel):
     def __init__(self, parent=None):
         super(JsonModel, self).__init__(parent=parent)
         self.setHorizontalHeaderLabels(["Key", "Value"])
+        self.itemChanged.connect(self._item_changed)
+
+    @QtCore.Slot()
+    def _item_changed(self, key):
+        """TODO"""
+        print("_item_changed")
 
     def items_from_dict(self, data, parent=None):
         """Represent the dictionary by items."""
@@ -74,6 +83,7 @@ class JsonModel(QtGui.QStandardItemModel):
         return ("null" if value is None
                 else "[]" if value == []
                 else "{}" if value == {}
+                else "\"\"" if value == ""
                 else str(value))
 
     def _create_value_item(self, value):
@@ -94,13 +104,13 @@ class JsonModel(QtGui.QStandardItemModel):
         value_item.setFlags(flags)
         return value_item
 
-    def _create_add_item(self, parent):
-        add_item = QtGui.QStandardItem("__add_item__")
-        add_item.setFlags(
-            QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled)
-        empty_item = QtGui.QStandardItem()
-        empty_item.setFlags(QtCore.Qt.ItemIsEnabled)
-        parent.appendRow([add_item, empty_item])
+    # def _create_add_item(self, parent):
+    #     add_item = QtGui.QStandardItem("__add_item__")
+    #     add_item.setFlags(
+    #         QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled)
+    #     empty_item = QtGui.QStandardItem()
+    #     empty_item.setFlags(QtCore.Qt.ItemIsEnabled)
+    #     parent.appendRow([add_item, empty_item])
 
     def _create_empty_item(self):
         empty_item = QtGui.QStandardItem()
@@ -117,8 +127,8 @@ class JsonModel(QtGui.QStandardItemModel):
         for row in range(self.rowCount()):
             item = self.item(row, 0)
             key = item.data(QtCore.Qt.DisplayRole)
-            if item.data(QtCore.Qt.DisplayRole) == "__add_item__":
-                continue
+            # if item.data(QtCore.Qt.DisplayRole) == "__add_item__":
+                # continue
             data[key] = self._serialize(item)
         return data
 
@@ -137,8 +147,8 @@ class JsonModel(QtGui.QStandardItemModel):
         for row in range(item.rowCount()):
             key = item.child(row, 0).data(QtCore.Qt.DisplayRole)
             value = self._value(item, row)
-            if item.child(row, 0).data(QtCore.Qt.DisplayRole) == "__add_item__":
-                continue
+            # if item.child(row, 0).data(QtCore.Qt.DisplayRole) == "__add_item__":
+                # continue
             if data_type == dict:
                 serialized[key] = value
             elif data_type == list:

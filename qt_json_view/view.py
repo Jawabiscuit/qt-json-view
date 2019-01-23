@@ -9,6 +9,7 @@ class JsonView(QtWidgets.QTreeView):
         super(JsonView, self).__init__(parent=parent)
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self._menu)
+        self.setSelectionMode(self.ExtendedSelection)
 
     def _menu(self, position):
         menu = QtWidgets.QMenu()
@@ -51,13 +52,11 @@ class JsonView(QtWidgets.QTreeView):
         key_item = self.model()._create_key_item(key_label, data_type)
 
         if data_type is list:
-            empty_item = self.model()._create_empty_item()
-            parent.appendRow([key_item, empty_item])
-            self.model().items_from_list([], key_item)
+            value_item = self.model()._create_value_item([])
+            parent.appendRow([key_item, value_item])
         elif data_type is dict:
-            empty_item = self.model()._create_empty_item()
-            parent.appendRow([key_item, empty_item])
-            self.model().items_from_dict({}, key_item)
+            value_item = self.model()._create_value_item({})
+            parent.appendRow([key_item, value_item])
         else:
             defaults = {bool: False, int: 0, float: 0.0, basestring: ""}
             value_item = self.model()._create_value_item(defaults[data_type])

@@ -8,7 +8,7 @@ from qt_json_view.model import JsonModel
 from qt_json_view.utils import load, dump
 
 
-def dumpTestData(encoding="json"):
+def dumpTestData(format="json"):
     data = {
         "none": None,
         "bool": True,
@@ -24,14 +24,14 @@ def dumpTestData(encoding="json"):
                 "empty_list": []},
             "empty_dict": {},}}
 
-    result = tempfile.mkstemp(suffix="." + encoding)
-    dump(data, result[-1], encoding=encoding)
+    result = tempfile.mkstemp(suffix="." + format)
+    dump(data, result[-1], format=format)
 
     return result[-1]
 
 
-def loadTestData(filepath, encoding="json"):
-    return load(filepath, encoding=encoding)
+def loadTestData(filepath, format="json"):
+    return load(filepath, format=format)
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -59,12 +59,16 @@ class MainWindow(QtWidgets.QMainWindow):
 
         button = QtWidgets.QPushButton("Serialize")
         self.vboxlayout.addWidget(button)
-        button.clicked.connect(self.serialize)
+        button.clicked.connect(self.onSerializePressed)
 
         # TODO: Pickle error
-        button = QtWidgets.QPushButton("&Save")
+        # button = QtWidgets.QPushButton("&Save")
+        # self.vboxlayout.addWidget(button)
+        # button.clicked.connect(self.onSavePressed)
+
+        button = QtWidgets.QPushButton("Load")
         self.vboxlayout.addWidget(button)
-        button.clicked.connect(self.onSaveClicked)
+        button.clicked.connect(self.onLoadPressed)
 
         selectionModel = self.view.selectionModel()
         self.view.selectionModel().selectionChanged.connect(
@@ -87,13 +91,15 @@ class MainWindow(QtWidgets.QMainWindow):
             else:
                 self.statusBar().showMessage("Pos: ({}, {}) in top level".format(row, col))
 
-    def serialize(self):
+    @QtCore.Slot()
+    def onSerializePressed(self):
         tmp = tempfile.mkstemp(suffix=".json")[-1]
         print(json.dumps(self.view.model().serialize(), indent=2))
-        dump(json.dumps(self.view.model().serialize()), tmp, encoding="json")
+        dump(self.view.model().serialize(), tmp, format="json", indent=2)
         self.statusBar().showMessage("File saved: {}".format(tmp))
 
-    def onSaveClicked(self):
+    @QtCore.Slot()
+    def onSavePressed(self):
         tmp = tempfile.mkstemp(suffix=".json")[-1]
         file = QtCore.QFile(tmp)
         file.open(QtCore.QIODevice.WriteOnly)
@@ -102,6 +108,31 @@ class MainWindow(QtWidgets.QMainWindow):
         self.saveModel(model.invisibleRootItem(), stream)
         file.close()
         self.statusBar().showMessage("File saved: {}".format(tmp))
+
+    @QtCore.Slot()
+    def onLoadPressed(self):
+        fileName = self.setOpenFileName()
+        if not fileName:
+            return
+        data = load(fileName, format="json")
+
+        from pprint import pprint
+        pprint(data)
+
+        if data:
+            model = JsonModel()
+            model.items_from_dict(data=data)
+            self.view.setModel(model)
+
+    def setOpenFileName(self):
+        options = QtWidgets.QFileDialog.Options()
+        fileName, filtr = QtWidgets.QFileDialog.getOpenFileName(self,
+            "QFileDialog.getOpenFileName()",
+            "",
+            "All Files (*);;Text Files (*.txt)", "", options)
+        if fileName:
+            self.statusBar().showMessage("Loading file: {}".format(fileName))
+        return fileName
 
     def saveModel(self, item, stream):
         for i in range(0, item.rowCount()):
