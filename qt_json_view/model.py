@@ -12,10 +12,55 @@ class JsonModel(QtGui.QStandardItemModel):
         self.setHorizontalHeaderLabels(["Key", "Value"])
         self.itemChanged.connect(self._item_changed)
 
-    @QtCore.Slot()
-    def _item_changed(self, key):
+    @QtCore.Slot(QtGui.QStandardItem)
+    def _item_changed(self, item):
         """TODO"""
-        print("_item_changed")
+        print("_item_changed", item)
+        print("row:", item.index().row())
+        print("col:", item.index().column())
+        print("data:", item.data(QtCore.Qt.DisplayRole))
+        print("data:", item.data(QtCore.Qt.UserRole))
+        print("col count:", self.columnCount())
+        key_item = self.item(item.index().row(), 0)
+        print("k_row:", key_item.index().row())
+        print("k_col:", key_item.index().column())
+        print("data:", key_item.data(QtCore.Qt.DisplayRole))
+        print("data:", key_item.data(QtCore.Qt.UserRole))
+        
+        row = item.index().row()
+        parent = item.parent()
+        if parent is None:
+            parent = self.invisibleRootItem()
+
+        if item.index().column() > 0:
+            print("poo")
+            key_item = self.item(row, 0)
+            data_type = key_item.data(QtCore.Qt.UserRole)
+
+            if data_type is list:
+                #parent = item
+
+                try:
+                    data = eval(item.data(QtCore.Qt.DisplayRole))
+                except:
+                    import traceback
+                    traceback.print_exc()
+                    return
+                else:
+                    print("data", data)
+                    print("parent", parent.text())
+                    # self.items_from_list(data, parent)
+
+                self.takeRow(row)
+                print("k_item:", key_item.text())
+                empty_item = self._create_empty_item()
+                parent.insertRow(row, [key_item, empty_item])
+
+                parent = key_item
+                for i, value in enumerate(data):
+                    value_item = self._create_value_item(value)
+                    key_item = self._create_key_item(str(i), data_type=type(value))
+                    parent.appendRow([key_item, value_item])
 
     def items_from_dict(self, data, parent=None):
         """Represent the dictionary by items."""
