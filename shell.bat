@@ -23,5 +23,5 @@ rem Aliases
 if exist ".\aliases.cmd" ( call ".\aliases.cmd" )
 
 rem Qt.py preferred Qt binding
-set QT_PREFERRED_BINDING=PyQt5
+rem set QT_PREFERRED_BINDING=PyQt5
 
